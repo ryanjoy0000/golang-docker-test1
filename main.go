@@ -14,7 +14,7 @@ import (
 var tpl *template.Template
 
 const (
-	webServerAdd = "localhost:5555"
+	webServerAdd = ":5555"
 )
 
 func init() {
@@ -25,23 +25,42 @@ func main() {
 	fmt.Println("App running on arch: ", runtime.GOARCH, runtime.GOOS)
 	fmt.Println("App listening on port: ", webServerAdd)
 
+	fmt.Println("Starting web server...")
+	// normalServer()
+	chiServer()
+}
+
+func normalServer() {
+	http.HandleFunc("/", homePage)
+	http.HandleFunc("/contact", contactPage)
+
+	err := http.ListenAndServe(webServerAdd, nil)
+	handleErr(err)
+}
+
+func chiServer() {
 	chiMux := chi.NewRouter()
 	chiMux.Use(middleware.Logger)
 	chiMux.Get("/", homePage)
 	chiMux.Get("/contact", contactPage)
 
-	fmt.Println("Starting web server...")
 	err := http.ListenAndServe(webServerAdd, chiMux)
 	handleErr(err)
 }
 
 func homePage(respW http.ResponseWriter, req *http.Request) {
+	// msg := "Home Page"
+	// respW.Write([]byte(msg))
+
 	respW.Header().Set("Content-Type", "text/html; charset=utf-8")
 	err := tpl.ExecuteTemplate(respW, "index.html", nil)
 	handleHttpErr(err, respW)
 }
 
 func contactPage(respW http.ResponseWriter, req *http.Request) {
+	// msg := "Contact Us Page"
+	// respW.Write([]byte(msg))
+
 	respW.Header().Set("Content-Type", "text/html; charset=utf-8")
 	err := tpl.ExecuteTemplate(respW, "contact.html", nil)
 	handleHttpErr(err, respW)
